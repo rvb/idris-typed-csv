@@ -113,7 +113,7 @@ deriv a (Kleene x) = Conc (deriv a x) x
 deriv a (Alt x y) = Alt (deriv a x) (deriv a y)
 deriv a (And x y) = And (deriv a x) (deriv a y)
 
-data Match: (s: List Char) -> Regex -> Type where
+data Match: List Char -> Regex -> Type where
   MatchNil: Nullable r -> Match [] r
   --The DecEq/x noise is to justify use of deriv.
   MatchCons: Match xs (deriv x r) -> Match (x :: xs) r
@@ -133,3 +133,9 @@ match (x :: xs) r =
   case match xs (deriv x r) of
     (Yes prf) => Yes (MatchCons prf)
     (No contra) => No (remainderMismatch contra)
+
+MatchString: String -> Regex -> Type
+MatchString s r = Match (unpack s) r
+
+matchString: (s: String) -> (r: Regex) -> Dec (MatchString s r)
+matchString s r = match (unpack s) r
