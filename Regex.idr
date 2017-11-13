@@ -23,14 +23,6 @@ public export data Regex: Type where
 --1) s is empty and r accepts empty strings
 --2) s = "a" + t, and the derivative of r w.r.t a accepts t.
 --Effectively, derivatives implement a notion of 'partial matching state'.
---Problems with this type:
---1) How do we link this to matching?
---The main problem is that trying to rely on idris
---to reduce this doesn't seem to work at all.
---That is, even if we have the result of f x,
---and pattern match on it, see it's empty, idris won't let us
---take it and claim it's Empty with Refl.
---Potential solution: Nullability proofs.
 data Nullable: Regex -> Type where
   NullableEmpty: Nullable Empty
   NullableConc: Nullable x -> Nullable y -> Nullable (Conc x y)
@@ -113,9 +105,11 @@ deriv a (Kleene x) = Conc (deriv a x) x
 deriv a (Alt x y) = Alt (deriv a x) (deriv a y)
 deriv a (And x y) = And (deriv a x) (deriv a y)
 
+--Regexes match iff either:
+--The regex is nullable and the string is empty
+--The derivative w.r.t. the first char matches the remainder
 data Match: List Char -> Regex -> Type where
   MatchNil: Nullable r -> Match [] r
-  --The DecEq/x noise is to justify use of deriv.
   MatchCons: Match xs (deriv x r) -> Match (x :: xs) r
 
 nilNonNullable: (Nullable r -> Void) -> (Match [] r -> Void)
