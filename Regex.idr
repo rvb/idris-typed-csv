@@ -10,7 +10,7 @@ import Data.List
 --to involve non-strictly-positive constructors.
 --This also works entirely on Chars to avoid weird
 --type checking bugs due to interface resolution.
-data Regex: Type where
+public export data Regex: Type where
   Empty: Regex 
   Null: Regex 
   Single: Char -> Regex
@@ -134,8 +134,8 @@ match (x :: xs) r =
     (Yes prf) => Yes (MatchCons prf)
     (No contra) => No (remainderMismatch contra)
 
-MatchString: String -> Regex -> Type
+export MatchString: String -> Regex -> Type
 MatchString s r = Match (unpack s) r
 
-matchString: (s: String) -> (r: Regex) -> Dec (MatchString s r)
+export matchString: (s: String) -> (r: Regex) -> Dec (MatchString s r)
 matchString s r = match (unpack s) r
