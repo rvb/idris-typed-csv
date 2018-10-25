@@ -16,3 +16,4 @@ This repo contains:
 - Schema.idr: Types representing the schema of a typed CSV
 - Main.idr: The main loop, reading and checking the file row by row. Currently, this only checks whether the file is valid.
 - Query.idr: Some thoughts towards querying, currently very incomplete.
+- test.csv: An example typed CSV file
