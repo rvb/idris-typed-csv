@@ -1,21 +1,21 @@
 module Query
---To round off the day, some ideas on how we might define query types here.
 
-import Data.List
+import Data.Vect
 
 import Schema
 
-unionCols: List ColumnSchema -> List ColumnSchema -> List ColumnSchema
-unionCols xs ys = nub (xs ++ ys)
+data Expr: CSVSchema n -> Type -> Type where
+  LitInt: Expr s Int
+  --Similar literals for other types (Double, bool,string)
+  IntColumn: (n: String) -> Data.Vect.Elem (CSchema n CInt) s -> Expr (CSVS s) Int
+  --Same for other types.
+  --Operators, i.e.:
+  Leq: Expr s Int -> Expr s Int -> Expr s Bool
 
---Queries are either value comparisons of some sort, or refer to a specific row.
---Basic spec:
---index by row
---<=, >=, = on ints and doubles
---= on strings
---And/or/not of queries
-data Query: (columnsNeeded: List ColumnSchema) -> (rowsNeeded: Nat) -> Type where
-  Index: (m : Nat) -> Query [] m
-  Not: Query cols n -> Query cols n
-  And: Query cols1 n1 -> Query cols2 n2 -> Query (unionCols cols1 cols2) (max n1 n2)
-  Or: Query cols1 n1 -> Query cols2 n2 -> Query (unionCols cols1 cols2) (max n1 n2)
+matches: Expr s Bool -> CSVRow s -> Bool
+
+partition: (f: x -> Bool) -> Vect m x -> (k ** l ** Vect k ((v:x) ** So (f x)) ** Vect l ((v: x) ** So (not (f x))) ** k + l = m)
+
+choose: (b: Bool) -> Either (So b) (So (not b))
+
+filter: Vect m (CSVRow s) -> (query: Expr s Bool) -> (n : Nat ** Vect n (r:CSVRow s ** So (matches query r)))

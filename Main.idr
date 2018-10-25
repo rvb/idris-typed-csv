@@ -21,8 +21,7 @@ parseColumnType {s = "String"} Here = CString
 parseColumnType {s = "Bool"} (There Here) = CBool
 parseColumnType {s = "Int"} (There (There Here)) = CInt
 parseColumnType {s = "Double"} (There (There (There Here))) = CDouble
-parseColumnType {s = _} (There (There (There (There Here)))) impossible
-parseColumnType {s = _} (There (There (There (There (There _))))) impossible
+parseColumnType {s = _} (There (There (There (There _)))) impossible
 
 IsValidType: String -> ColumnType -> Type
 IsValidType s t = ValidEnum ["String", "Bool", "Int", "Double"] s parseColumnType t
@@ -34,15 +33,16 @@ isValidType s = isValidEnum s
 --TODO: Tighten to a Dec, with a sensible predicate.
 parseColumnSchema: (s: String) -> Maybe ColumnSchema
 parseColumnSchema s =
-  let (name, typeBracketed) = span (/= '[') s in
-    let (_, typeRightBracket) = span (== '[') typeBracketed in
-      let (typeS, bracket) = span (/= ']') typeRightBracket in
-        case bracket of
-          "]" =>
-            case isValidType typeS of
-              (Yes (t ** _)) => Just (CSchema name t)
-              (No contra) => Nothing
-          _ => Nothing
+  let (name, typeBracketed) = span (/= '[') s
+      (_, typeRightBracket) = span (== '[') typeBracketed
+      (typeS, bracket) = span (/= ']') typeRightBracket
+  in
+    case bracket of
+      "]" =>
+        case isValidType typeS of
+          (Yes (t ** _)) => Just (CSchema name t)
+          (No contra) => Nothing
+      _ => Nothing
           
  --TODO: Fix.
 parseRowSchema: (s: String) -> Maybe (n: Nat ** CSVSchema n)

@@ -1,21 +1,20 @@
 module NumberParsing
 import Data.List
-import AtMostOne
 
 import Regex
 
 %default total
 
-digit: Regex
+public export digit: Regex
 digit = foldr (\c, r => Alt (Single c) r) Null (unpack "0123456789")
 
-atLeastOne: Regex -> Regex
+public export atLeastOne: Regex -> Regex
 atLeastOne x = Conc x (Kleene x)
 
-natRE: Regex
+public export natRE: Regex
 natRE = atLeastOne digit
 
-intRE: Regex
+public export intRE: Regex
 intRE = Conc (Alt Empty (Single '-')) natRE
 
 export data StringIsValidInt: String -> Int -> Type where
@@ -32,7 +31,6 @@ parseInt s =
     (Yes prf) => Yes (cast s ** IsAnInt s prf)
     (No contra) => No (mismatchNotInt contra)
 
---TODO: Doubles.
 doubleRE: Regex
 doubleRE = Conc intRE (Alt Empty (Conc (Single '.') natRE))
 

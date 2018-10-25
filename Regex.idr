@@ -23,7 +23,7 @@ public export data Regex: Type where
 --1) s is empty and r accepts empty strings
 --2) s = "a" + t, and the derivative of r w.r.t a accepts t.
 --Effectively, derivatives implement a notion of 'partial matching state'.
-data Nullable: Regex -> Type where
+public export data Nullable: Regex -> Type where
   NullableEmpty: Nullable Empty
   NullableConc: Nullable x -> Nullable y -> Nullable (Conc x y)
   NullableAltL: Nullable x -> Nullable (Alt x y)
@@ -31,7 +31,7 @@ data Nullable: Regex -> Type where
   NullableKleene: Nullable (Kleene x)
   NullableAnd: Nullable x -> Nullable y -> Nullable (And x y)
 
-nullNonNullable: Nullable Null -> Void
+public export nullNonNullable: Nullable Null -> Void
 nullNonNullable NullableEmpty impossible
 nullNonNullable (NullableConc _ _) impossible
 nullNonNullable (NullableAltL _) impossible
@@ -39,7 +39,7 @@ nullNonNullable (NullableAltR _) impossible
 nullNonNullable NullableKleene impossible
 nullNonNullable (NullableAnd _ _) impossible
 
-singleNonNullable: Nullable (Single x) -> Void
+public export singleNonNullable: Nullable (Single x) -> Void
 singleNonNullable NullableEmpty impossible
 singleNonNullable (NullableConc _ _) impossible
 singleNonNullable (NullableAltL _) impossible
@@ -63,7 +63,7 @@ andNonNullableL xn (NullableAnd x y) = xn x
 andNonNullableR: (Nullable x -> Void) -> Nullable (And y x) -> Void
 andNonNullableR xn (NullableAnd y x) = xn x
 
-nullable: (r: Regex) -> Dec (Nullable r)
+public export nullable: (r: Regex) -> Dec (Nullable r)
 nullable Empty = Yes NullableEmpty
 nullable Null = No nullNonNullable
 nullable (Single x) = No singleNonNullable
@@ -90,7 +90,7 @@ nullable (And x y) =
         (No yn) => No (andNonNullableR yn)
     (No xn) => No (andNonNullableL xn)
     
-deriv: Char -> Regex -> Regex
+public export deriv: Char -> Regex -> Regex
 deriv a Empty = Null
 deriv a Null = Null
 deriv a (Single x) =
@@ -101,7 +101,7 @@ deriv a (Conc x y) =
   case nullable x of
     Yes _ => Alt (Conc (deriv a x) y) (deriv a y)
     No _ => Conc (deriv a x) y
-deriv a (Kleene x) = Conc (deriv a x) x
+deriv a (Kleene x) = Conc (deriv a x) (Kleene x)
 deriv a (Alt x y) = Alt (deriv a x) (deriv a y)
 deriv a (And x y) = And (deriv a x) (deriv a y)
 
@@ -116,7 +116,7 @@ nilNonNullable: (Nullable r -> Void) -> (Match [] r -> Void)
 nilNonNullable nope (MatchNil yes) = nope yes
 
 remainderMismatch: (Match xs (deriv x r) -> Void) -> Match (x :: xs) r -> Void
-remainderMismatch nottail (MatchCons tail) = nottail tail 
+remainderMismatch nottail (MatchCons tail) = nottail tail
 
 match: (s: List Char) -> (r: Regex) -> Dec (Match s r)
 match [] r =
